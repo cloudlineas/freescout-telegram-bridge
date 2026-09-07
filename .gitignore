@@ -1,0 +1,19 @@
+# Contains a live bot token and the FreeScout webhook secret. Never commit.
+.env
+.env.bak-*
+
+# Editor swap/backup files can hold fragments of the above (e.g. vim's ..env.swp)
+*.swp
+*.swo
+*~
+.*.swp
+
+# Private, site-specific deployment notes
+DEPLOY.private.md
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/

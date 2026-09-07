@@ -1,0 +1,10 @@
+# Dev-machine only. Publishes a port so you can curl the bridge directly.
+# The production service (see compose-service.yml) publishes nothing.
+services:
+  freescout-telegram:
+    build: .
+    container_name: freescout-telegram-dev
+    env_file: .env
+    ports:
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
