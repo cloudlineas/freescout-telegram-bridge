@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest -q
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          load: true
+          tags: bridge:ci
+
+      # A base-image bump that builds fine can still break at runtime, so the
+      # image is actually started and probed. Without this a broken FROM merges
+      # green -- exactly the kind of silent failure this project exists to avoid.
+      - name: Run the image and probe /healthz
+        run: |
+          docker run -d --name bridge-ci -p 8080:8080 \
+            -e TELEGRAM_BOT_TOKEN=dummy \
+            -e TELEGRAM_CHAT_ID=1 \
+            -e FREESCOUT_WEBHOOK_SECRET=dummy \
+            bridge:ci
+          for i in $(seq 1 30); do
+            if curl -fsS -m 2 http://127.0.0.1:8080/healthz; then
+              echo && echo "healthz OK"
+              docker exec bridge-ci id | grep -q 'uid=10001' \
+                || { echo "not running as uid 10001"; exit 1; }
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "bridge did not become healthy"
+          docker logs bridge-ci
+          exit 1
+
+      - name: Container logs on failure
+        if: failure()
+        run: docker logs bridge-ci || true

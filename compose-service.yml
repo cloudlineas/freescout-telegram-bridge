@@ -1,0 +1,42 @@
+# PRODUCTION service block.
+#
+# Paste this into the `services:` section of the docker-compose.yml that already
+# runs your FreeScout container, and set the secrets in that stack's .env file.
+#
+# Deliberately NOT on a public-facing network, with NO reverse-proxy labels and
+# NO published ports: only the freescout container needs to reach it. Put it on
+# whatever internal network your freescout container is on, then point the
+# FreeScout webhook at:
+#   http://freescout-telegram:8080/freescout
+
+  freescout-telegram:
+    image: ghcr.io/cloudlineas/freescout-telegram-bridge:0.2.1
+    container_name: freescout-telegram
+    restart: unless-stopped
+    networks:
+      - internal
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN not set}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:?TELEGRAM_CHAT_ID not set}
+      - FREESCOUT_WEBHOOK_SECRET=${FREESCOUT_WEBHOOK_SECRET:?FREESCOUT_WEBHOOK_SECRET not set}
+      - FREESCOUT_URL=${FREESCOUT_URL:-}
+      - EVENTS=${TELEGRAM_EVENTS:-convo.created,convo.customer.reply.created}
+      - MAILBOX_NAMES=${TELEGRAM_MAILBOX_NAMES:-}
+      - LOG_LEVEL=${TELEGRAM_LOG_LEVEL:-INFO}
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=5).status == 200 else 1)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,component,environment"
+    labels:
+      - "logging.service=freescout-telegram"
+      - "logging.component=notifications"
+      - "logging.environment=production"
