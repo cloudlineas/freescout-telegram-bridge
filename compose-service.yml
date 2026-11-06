@@ -10,7 +10,7 @@
 #   http://freescout-telegram:8080/freescout
 
   freescout-telegram:
-    image: ghcr.io/cloudlineas/freescout-telegram-bridge:0.2.1
+    image: ghcr.io/cloudlineas/freescout-telegram-bridge:0.2.2
     container_name: freescout-telegram
     restart: unless-stopped
     networks:
