@@ -99,6 +99,17 @@ def signature_ok(raw_body: bytes, provided: str) -> bool:
     return hmac.compare_digest(expected, provided or "")
 
 
+def created_by_agent(convo: dict) -> bool:
+    """True for a conversation an agent started, e.g. a new email sent from FreeScout.
+
+    Anything else counts as a customer ticket, including a payload without these
+    fields: a stray notification beats silently dropping a real ticket.
+    """
+    created_by = convo.get("createdBy") or {}
+    source = convo.get("source") or {}
+    return created_by.get("type") == "user" or source.get("via") == "user"
+
+
 def describe_sender(convo: dict) -> str:
     person = convo.get("customer") or convo.get("createdBy") or {}
     name = " ".join(
@@ -184,6 +195,10 @@ def freescout_webhook():
     if not isinstance(convo, dict):
         log.warning("event %s had a non-object JSON body", event)
         return jsonify(error="expected a JSON object"), 400
+
+    if event == "convo.created" and created_by_agent(convo):
+        log.info("ignoring agent-created conversation %s", convo.get("id"))
+        return jsonify(status="ignored", event=event, reason="created by agent"), 200
 
     text = build_message(event, convo)
 
