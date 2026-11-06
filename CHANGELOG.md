@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `convo.created` no longer notifies for conversations started by an agent, such
+  as a new email sent from FreeScout. Customer replies to them still notify.
+
 ## [0.2.1] - 2026-09-08
 
 ### Changed

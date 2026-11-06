@@ -136,6 +136,43 @@ def test_unsubscribed_events_are_dropped_with_200(client, telegram, event):
     assert telegram.calls == []
 
 
+@pytest.mark.parametrize(
+    "fields",
+    [
+        {"createdBy": {"id": 1, "type": "user"}, "source": {"type": "web", "via": "user"}},
+        {"createdBy": {"id": 1, "type": "user"}},
+        {"source": {"type": "web", "via": "user"}},
+    ],
+)
+def test_agent_created_conversation_is_dropped_with_200(client, telegram, fields):
+    response = post(client, convo=dict(CONVO, **fields))
+    assert response.status_code == 200
+    assert response.get_json()["status"] == "ignored"
+    assert telegram.calls == []
+
+
+@pytest.mark.parametrize(
+    "fields",
+    [
+        {
+            "createdBy": {"id": 11, "type": "customer"},
+            "source": {"type": "email", "via": "customer"},
+        },
+        {},  # missing fields must never lose a ticket
+        {"createdBy": None, "source": None},
+    ],
+)
+def test_customer_created_conversation_is_delivered(client, telegram, fields):
+    assert post(client, convo=dict(CONVO, **fields)).status_code == 200
+    assert len(telegram.calls) == 1
+
+
+def test_customer_reply_on_agent_created_conversation_is_delivered(client, telegram):
+    convo = dict(CONVO, createdBy={"id": 1, "type": "user"}, source={"via": "user"})
+    assert post(client, convo=convo, event="convo.customer.reply.created").status_code == 200
+    assert len(telegram.calls) == 1
+
+
 def test_non_object_body_is_rejected(client, telegram):
     body = b"[1, 2, 3]"
     response = client.post(

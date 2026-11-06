@@ -210,6 +210,9 @@ By design — see below.
   200 on failure would recreate the exact silent-drop bug this replaces.
 - **Unknown events are acknowledged with 200 and dropped**, so subscribing to an
   extra event in the FreeScout UI can never wedge delivery.
+- **Agent-created conversations don't notify.** `convo.created` is dropped when
+  `createdBy.type` or `source.via` is `user`. A payload without those fields
+  still notifies, so a real ticket is never lost.
 - **Everything interpolated into a message is HTML-escaped.**
 - Runs as a non-root user (uid 10001); the base image is pinned by digest.
 
