@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-06
+
 ### Fixed
 
 - `convo.created` no longer notifies for conversations started by an agent, such
   as a new email sent from FreeScout. Customer replies to them still notify.
+
+### Changed
+
+- Refreshed the `python:3.14-slim` base image digest.
 
 ## [0.2.1] - 2026-09-08
 
@@ -59,5 +65,6 @@ First public release.
 
 <!-- 0.1.0 and 0.2.0 predate the squash of this repository's history and have no
      tag to link to; their images remain on GHCR. -->
-[Unreleased]: https://github.com/cloudlineas/freescout-telegram-bridge/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/cloudlineas/freescout-telegram-bridge/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/cloudlineas/freescout-telegram-bridge/releases/tag/v0.2.2
 [0.2.1]: https://github.com/cloudlineas/freescout-telegram-bridge/releases/tag/v0.2.1

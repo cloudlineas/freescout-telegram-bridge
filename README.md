@@ -109,14 +109,14 @@ credential** — it is derived from your application key.
 
 ```bash
 docker run -d --name freescout-telegram --env-file .env \
-  ghcr.io/cloudlineas/freescout-telegram-bridge:0.2.1
+  ghcr.io/cloudlineas/freescout-telegram-bridge:0.2.2
 ```
 
 Images are multi-arch (`linux/amd64`, `linux/arm64`). Pin a version tag rather
 than `latest`.
 
-> Image tags carry no `v` prefix, even though git tags do: the release `v0.2.1`
-> publishes `:0.2.1`, `:0.2` and `:latest`.
+> Image tags carry no `v` prefix, even though git tags do: the release `v0.2.2`
+> publishes `:0.2.2`, `:0.2` and `:latest`.
 
 ### Alongside FreeScout in Compose
 
